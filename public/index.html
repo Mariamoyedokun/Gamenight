@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Department of Fun</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <div class="brand-lockup">
+          <span class="brand-mark">D</span>
+          <span class="brand-text">Department of Fun</span>
+        </div>
+      </header>
+
+      <main class="app-frame">
+        <div id="connection-status-banner" class="connection-banner hidden" aria-live="polite"></div>
+
+        <section id="landing-view" class="screen active">
+          <div class="hero-card">
+            <p class="eyebrow">Welcome to the Department of Fun.</p>
+            <h1>The fun starts when you do.</h1>
+            <p class="subcopy">Bring your people. Pick your games. Make a night of it.</p>
+
+            <div class="cta-group">
+              <button class="primary-button" data-action="show-create">Create a Room</button>
+              <button class="secondary-button" data-action="show-join">Join a Room</button>
+            </div>
+
+            <div class="simple-steps">
+              <div class="step-item">
+                <span class="step-number">1</span>
+                <div>
+                  <h2>Create or Join</h2>
+                  <p>Start a room or enter a room code shared by a friend.</p>
+                </div>
+              </div>
+              <div class="step-item">
+                <span class="step-number">2</span>
+                <div>
+                  <h2>Gather Your People</h2>
+                  <p>Everyone joins on their own phone. The host gets everyone settled.</p>
+                </div>
+              </div>
+              <div class="step-item">
+                <span class="step-number">3</span>
+                <div>
+                  <h2>Let the Games Begin</h2>
+                  <p>The host picks a game, everyone plays, and the fun unfolds.</p>
+                </div>
+              </div>
+            </div>
+
+            <p class="supporting-line">One room. Your people. Plenty of ways to have fun.</p>
+            <p class="creator-credit">A Ray of Light Project</p>
+          </div>
+
+          <div class="about-panel">
+            <h3>About the experience</h3>
+            <p>
+              The Department of Fun makes hosting and participating in game nights easier and more interactive.
+              It brings people together to connect, compete, laugh and create memories, one game at a time.
+            </p>
+          </div>
+        </section>
+
+        <section id="auth-panel" class="screen" aria-live="polite">
+          <div class="auth-card">
+            <div class="panel-header">
+              <button class="back-link" data-action="back-to-home">← Back</button>
+            </div>
+
+            <div id="create-room-form-view" class="form-view hidden">
+              <h2>Create a room</h2>
+              <form id="create-room-form" class="stacked-form">
+                <label>
+                  <span>Display name</span>
+                  <input type="text" id="create-display-name" maxlength="16" placeholder="Your name" required />
+                </label>
+                <label>
+                  <span>Room name</span>
+                  <input type="text" id="create-room-name" maxlength="30" placeholder="Friday night fun" required />
+                </label>
+                <button type="submit" class="primary-button full-width">Create Room</button>
+              </form>
+            </div>
+
+            <div id="join-room-form-view" class="form-view hidden">
+              <h2>Join a room</h2>
+              <form id="join-room-form" class="stacked-form">
+                <label>
+                  <span>Room code</span>
+                  <input type="text" id="join-room-code" maxlength="6" placeholder="RAY7K2" required />
+                </label>
+                <label>
+                  <span>Display name</span>
+                  <input type="text" id="join-display-name" maxlength="16" placeholder="Player name" required />
+                </label>
+                <button type="submit" class="primary-button full-width">Join Room</button>
+              </form>
+            </div>
+
+            <p id="auth-message" class="status-message" role="status"></p>
+          </div>
+        </section>
+
+        <section id="lobby-view" class="screen">
+          <div class="lobby-card">
+            <div class="lobby-header">
+              <div>
+                <p class="eyebrow small">Room</p>
+                <h2 id="lobby-room-name">Waiting room</h2>
+              </div>
+              <button id="leave-room-button" class="ghost-button">Leave room</button>
+            </div>
+
+            <div class="room-meta-row">
+              <div class="pill-box">
+                <span>Code</span>
+                <strong id="lobby-room-code">--</strong>
+              </div>
+              <div class="pill-box">
+                <span>Players</span>
+                <strong id="lobby-player-count">0/12</strong>
+              </div>
+            </div>
+
+            <div class="action-row">
+              <button id="copy-code-button" class="secondary-button">Copy room code</button>
+              <button id="copy-link-button" class="secondary-button">Copy invite link</button>
+            </div>
+
+            <div class="waiting-message-box">
+              <p class="waiting-line">The gang is getting together...</p>
+              <p>Hang tight. The fun is about to begin.</p>
+            </div>
+
+            <div class="player-panel">
+              <div class="panel-title-row">
+                <h3>Players</h3>
+              </div>
+              <ul id="player-list" class="player-list"></ul>
+            </div>
+
+            <div id="host-controls" class="host-controls hidden">
+              <button id="start-game-button" class="primary-button full-width">Start Game Night</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="selection-view" class="screen">
+          <div class="selection-card">
+            <div class="selection-header">
+              <div>
+                <p class="eyebrow small">Game selection</p>
+                <h2 id="selection-room-title">Choose your next game</h2>
+              </div>
+              <button class="ghost-button" data-action="show-round-history">Round history</button>
+            </div>
+
+            <div class="selection-meta">
+              <span id="selection-room-code">Code: --</span>
+              <span id="selection-player-count">Players: 0</span>
+            </div>
+
+            <div id="game-grid" class="game-grid" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section id="game-view" class="screen">
+          <div class="game-card">
+            <div class="game-header">
+              <button id="back-to-selection-button" class="ghost-button">← Back</button>
+              <div class="game-title-wrap">
+                <p class="eyebrow small">Current game</p>
+                <h2 id="selected-game-title">Most Likely To</h2>
+              </div>
+              <button class="ghost-button" data-action="show-round-history">History</button>
+            </div>
+
+            <div class="game-prompt-box">
+              <p id="game-prompt-label">Prompt</p>
+              <h3 id="game-prompt-text">Loading round…</h3>
+            </div>
+            <p id="game-connection-note" class="game-connection-note hidden" aria-live="polite"></p>
+
+            <section id="most-likely-to-game-panel" class="five-second-panel hidden" aria-live="polite">
+              <div class="five-second-turn-header">
+                <p id="most-likely-to-question-number" class="five-second-turn-status"></p>
+                <p id="most-likely-to-progress" class="five-second-feedback"></p>
+              </div>
+              <div id="most-likely-to-suspense-box" class="suspense-box hidden">
+                <h3>Voting closed!</h3>
+                <p class="suspense-text">Revealing votes in <strong id="most-likely-to-suspense-countdown">3</strong>…</p>
+              </div>
+              <div id="most-likely-to-voting-box">
+                <p id="most-likely-to-instruction" class="five-second-feedback">Privately choose one other player (no self-voting):</p>
+                <div id="most-likely-to-options" class="vote-options"></div>
+              </div>
+              <div id="most-likely-to-reveal-box" class="hidden">
+                <div id="most-likely-to-spotlight" class="spotlight-card"></div>
+                <ul id="most-likely-to-results-list" class="five-second-scores"></ul>
+                <div class="host-controls">
+                  <button id="most-likely-to-next-btn" type="button" class="primary-button full-width hidden">Next Question</button>
+                  <button id="most-likely-to-end-btn" type="button" class="secondary-button full-width hidden">End Game</button>
+                </div>
+              </div>
+            </section>
+
+            <section id="hot-take-game-panel" class="five-second-panel hidden" aria-live="polite">
+              <div class="five-second-turn-header">
+                <p id="hot-take-number" class="five-second-turn-status"></p>
+                <p id="hot-take-progress" class="five-second-feedback"></p>
+              </div>
+              <div id="hot-take-voting-box">
+                <p class="five-second-feedback">Choose your side:</p>
+                <div class="hot-take-actions">
+                  <button id="hot-take-agree-btn" type="button" class="choice-button agree-btn">AGREE</button>
+                  <button id="hot-take-disagree-btn" type="button" class="choice-button disagree-btn">DISAGREE</button>
+                </div>
+                <button id="hot-take-lock-btn" type="button" class="primary-button full-width hidden" style="margin-top: 12px;">Lock In Choice</button>
+                <p id="hot-take-status-msg" class="five-second-feedback"></p>
+              </div>
+              <div id="hot-take-reveal-box" class="hidden">
+                <div class="defend-banner">
+                  <h2>DEFEND YOUR POSITION!</h2>
+                </div>
+                <div id="hot-take-sides-container" class="hot-take-sides">
+                  <div class="side-column agree-column">
+                    <h3>AGREE (<span id="hot-take-agree-count">0</span>)</h3>
+                    <div id="hot-take-agree-speaker" class="speaker-highlight hidden"></div>
+                    <ul id="hot-take-agree-list" class="side-player-list"></ul>
+                  </div>
+                  <div class="side-column disagree-column">
+                    <h3>DISAGREE (<span id="hot-take-disagree-count">0</span>)</h3>
+                    <div id="hot-take-disagree-speaker" class="speaker-highlight hidden"></div>
+                    <ul id="hot-take-disagree-list" class="side-player-list"></ul>
+                  </div>
+                </div>
+                <div class="host-controls">
+                  <button id="hot-take-next-btn" type="button" class="primary-button full-width hidden">Next Hot Take</button>
+                  <button id="hot-take-end-btn" type="button" class="secondary-button full-width hidden">End Game</button>
+                </div>
+              </div>
+            </section>
+
+            <section id="five-second-game-panel" class="five-second-panel hidden" aria-live="polite">
+              <div class="five-second-turn-header">
+                <p id="five-second-turn-status" class="five-second-turn-status"></p>
+                <strong id="five-second-countdown" class="five-second-countdown"></strong>
+              </div>
+              <p id="five-second-tracker" class="five-second-feedback"></p>
+              <div id="five-second-action-box">
+                <button id="five-second-start-btn" type="button" class="primary-button full-width hidden">Start 5 Seconds</button>
+                <div id="five-second-judging-actions" class="finger-down-response-actions hidden">
+                  <p id="five-second-judging-label" class="turn-label full-width">Group Decision:</p>
+                  <button id="five-second-pass-btn" type="button" class="primary-button pass-btn">PASS</button>
+                  <button id="five-second-fail-btn" type="button" class="secondary-button fail-btn">FAIL</button>
+                </div>
+                <button id="five-second-next-btn" type="button" class="primary-button full-width hidden">Next Player</button>
+              </div>
+              <p id="five-second-feedback" class="five-second-feedback" role="status"></p>
+              <ul id="five-second-turn-history" class="five-second-scores"></ul>
+            </section>
+
+            <section id="heads-up-game-panel" class="five-second-panel hidden" aria-live="polite">
+              <div class="five-second-turn-header">
+                <p id="heads-up-turn-status" class="five-second-turn-status"></p>
+                <strong id="heads-up-countdown" class="five-second-countdown"></strong>
+              </div>
+              <div id="heads-up-word-card" class="heads-up-word-card"></div>
+              <button id="heads-up-start-btn" type="button" class="primary-button full-width hidden">Start Turn (60s)</button>
+              <div id="heads-up-group-controls" class="finger-down-response-actions hidden">
+                <button id="heads-up-correct-button" type="button" class="primary-button">CORRECT</button>
+                <button id="heads-up-skip-button" type="button" class="secondary-button">SKIP</button>
+              </div>
+              <div id="heads-up-turn-summary" class="round-result-card hidden">
+                <p id="heads-up-turn-summary-text"></p>
+                <button id="heads-up-next-btn" type="button" class="primary-button full-width hidden">Next Player</button>
+              </div>
+              <p id="heads-up-feedback" class="five-second-feedback" role="status"></p>
+              <ol id="heads-up-scores" class="five-second-scores hidden"></ol>
+            </section>
+
+            <section id="describe-word-game-panel" class="five-second-panel hidden" aria-live="polite">
+              <div class="five-second-turn-header">
+                <p id="describe-word-turn-status" class="five-second-turn-status"></p>
+                <strong id="describe-word-countdown" class="five-second-countdown"></strong>
+              </div>
+              <ol id="describe-word-team-scores" class="five-second-scores"></ol>
+              <div id="describe-word-card" class="heads-up-word-card"></div>
+              <div id="describe-word-nomination-controls" class="finger-down-response-actions hidden"></div>
+              <div id="describe-word-actions" class="finger-down-response-actions hidden">
+                <button type="button" class="primary-button" data-describe-action="correct">CORRECT</button>
+                <button type="button" class="secondary-button" data-describe-action="skip">SKIP</button>
+              </div>
+              <p id="describe-word-feedback" class="five-second-feedback" role="status"></p>
+              <button id="describe-word-end-btn" type="button" class="secondary-button full-width hidden" style="margin-top: 16px;">End Game Early</button>
+            </section>
+
+            <section id="finger-down-game-panel" class="five-second-panel hidden" aria-live="polite">
+              <div class="five-second-turn-header">
+                <p id="finger-down-round-status" class="five-second-turn-status"></p>
+                <strong id="finger-down-count" class="five-second-countdown"></strong>
+              </div>
+              <p id="finger-down-response-progress" class="five-second-feedback"></p>
+              <div id="finger-down-response-actions" class="finger-down-response-actions">
+                <button id="finger-down-button" type="button" class="primary-button">Put a finger down</button>
+                <button id="finger-down-still-up-button" type="button" class="secondary-button">Still up</button>
+                <button id="finger-down-prefer-not-button" type="button" class="secondary-button">Prefer not to answer</button>
+              </div>
+              <p id="finger-down-feedback" class="five-second-feedback" role="status"></p>
+              <ol id="finger-down-round-results" class="five-second-scores hidden"></ol>
+              <ol id="finger-down-final-scores" class="five-second-scores hidden"></ol>
+              <button id="finger-down-continue-button" type="button" class="primary-button full-width hidden">Next Prompt</button>
+            </section>
+
+            <section id="dont-laugh-game-panel" class="five-second-panel hidden" aria-live="polite">
+              <div class="teams-scoreboard">
+                <div class="team-card team-card-1">
+                  <h3 id="dont-laugh-team-1-name">Team 1</h3>
+                  <p class="team-score" id="dont-laugh-team-1-score">0 pts</p>
+                </div>
+                <div class="team-card team-card-2">
+                  <h3 id="dont-laugh-team-2-name">Team 2</h3>
+                  <p class="team-score" id="dont-laugh-team-2-score">0 pts</p>
+                </div>
+              </div>
+              <div class="five-second-turn-header">
+                <p id="dont-laugh-turn-status" class="five-second-turn-status"></p>
+                <strong id="dont-laugh-countdown" class="five-second-countdown"></strong>
+              </div>
+              <div id="dont-laugh-faceoff-card" class="faceoff-card">
+                <div class="faceoff-roles">
+                  <div class="challenger-box">
+                    <span class="role-badge">Challenger</span>
+                    <strong id="dont-laugh-challenger-name">--</strong>
+                  </div>
+                  <div class="vs-badge">VS</div>
+                  <div class="defender-box">
+                    <span class="role-badge">Defender</span>
+                    <strong id="dont-laugh-defender-name">--</strong>
+                  </div>
+                </div>
+              </div>
+              <button id="dont-laugh-start-btn" type="button" class="primary-button full-width hidden">Start 30s Face-Off</button>
+              <div id="dont-laugh-vote-actions" class="finger-down-response-actions hidden">
+                <p id="dont-laugh-judge-prompt" class="full-width">Did the defender laugh?</p>
+                <button id="dont-laugh-laughed-button" type="button" class="primary-button laugh-btn">LAUGH (Challenger +1)</button>
+                <button id="dont-laugh-straight-face-button" type="button" class="secondary-button did-not-laugh-btn">DIDN'T LAUGH (Defender +1)</button>
+              </div>
+              <div id="dont-laugh-round-result" class="round-result-card hidden">
+                <p id="dont-laugh-result-msg"></p>
+                <button id="dont-laugh-next-btn" type="button" class="primary-button full-width hidden">Next Face-Off</button>
+              </div>
+              <p id="dont-laugh-feedback" class="five-second-feedback" role="status"></p>
+              <ol id="dont-laugh-scores" class="five-second-scores hidden"></ol>
+            </section>
+
+            <section id="find-spy-game-panel" class="five-second-panel hidden" aria-live="polite">
+              <p id="find-spy-role" class="five-second-turn-status"></p>
+              <p id="find-spy-status" class="five-second-feedback"></p>
+              <strong id="find-spy-countdown" class="five-second-countdown"></strong>
+              <ol id="find-spy-speaking-order" class="five-second-scores hidden"></ol>
+              <button id="find-spy-done-button" type="button" class="primary-button full-width hidden">DONE</button>
+              <div id="find-spy-vote-actions" class="vote-options"></div>
+              <form id="find-spy-guess-form" class="heads-up-guess-form hidden">
+                <label>
+                  <span>Your final guess for the secret word</span>
+                  <input id="find-spy-guess-input" type="text" maxlength="80" autocomplete="off" required />
+                </label>
+                <button type="submit" class="primary-button full-width">Submit final guess</button>
+              </form>
+              <ol id="find-spy-results" class="five-second-scores hidden"></ol>
+            </section>
+
+            <section id="guess-who-game-panel" class="five-second-panel hidden" aria-live="polite">
+              <div class="five-second-turn-header">
+                <p id="guess-who-phase-status" class="five-second-turn-status"></p>
+                <p id="guess-who-progress" class="five-second-feedback"></p>
+              </div>
+              <div id="guess-who-submission-box" class="hidden">
+                <form id="guess-who-fact-form" class="heads-up-guess-form">
+                  <label>
+                    <span>Submit one interesting/unusual fact about yourself:</span>
+                    <textarea id="guess-who-fact-input" maxlength="200" rows="3" required placeholder="e.g. I once slept through an entire flight."></textarea>
+                  </label>
+                  <button id="guess-who-submit-fact-btn" type="submit" class="primary-button full-width">Submit Fact</button>
+                </form>
+                <p id="guess-who-submitted-notice" class="five-second-feedback"></p>
+                <button id="guess-who-close-submissions-btn" type="button" class="secondary-button full-width hidden">Close Submissions & Start Guessing</button>
+              </div>
+              <div id="guess-who-guessing-box" class="hidden">
+                <div class="fact-card">
+                  <p class="fact-eyebrow">Mystery Fact:</p>
+                  <blockquote id="guess-who-fact-display"></blockquote>
+                </div>
+                <div id="guess-who-options-container">
+                  <p id="guess-who-guessing-instruction">Who wrote this fact?</p>
+                  <div id="guess-who-author-options" class="vote-options"></div>
+                </div>
+              </div>
+              <div id="guess-who-reveal-box" class="hidden">
+                <div class="fact-reveal-card">
+                  <h3>Author: <span id="guess-who-revealed-author">--</span></h3>
+                  <p id="guess-who-correct-guessers">Correct guessers (+1 pt): </p>
+                </div>
+                <button id="guess-who-next-fact-btn" type="button" class="primary-button full-width hidden">Next Fact</button>
+              </div>
+              <p id="guess-who-feedback" class="five-second-feedback" role="status"></p>
+              <ol id="guess-who-scores" class="five-second-scores hidden"></ol>
+            </section>
+
+            <section id="who-am-i-game-panel" class="five-second-panel hidden" aria-live="polite">
+              <div class="five-second-turn-header">
+                <p id="who-am-i-turn-status" class="five-second-turn-status"></p>
+                <strong id="who-am-i-countdown" class="five-second-countdown"></strong>
+              </div>
+              <div id="who-am-i-identity-card" class="heads-up-word-card"></div>
+              <p id="who-am-i-attempts" class="five-second-feedback"></p>
+              <p id="who-am-i-instructions" class="five-second-feedback"></p>
+              <button id="who-am-i-start-btn" type="button" class="primary-button full-width hidden">Start Turn (60s)</button>
+              <button id="who-am-i-make-guess-btn" type="button" class="primary-button full-width hidden">MAKE A GUESS</button>
+              <form id="who-am-i-guess-form" class="heads-up-guess-form hidden">
+                <label>
+                  <span>Who am I?</span>
+                  <input id="who-am-i-guess-input" type="text" maxlength="50" autocomplete="off" required />
+                </label>
+                <button type="submit" class="primary-button full-width">Submit Guess</button>
+              </form>
+              <div id="who-am-i-reveal-card" class="round-result-card hidden">
+                <p id="who-am-i-reveal-msg"></p>
+                <button id="who-am-i-next-btn" type="button" class="primary-button full-width hidden">Next Player</button>
+              </div>
+              <p id="who-am-i-feedback" class="five-second-feedback" role="status"></p>
+              <ol id="who-am-i-scores" class="five-second-scores hidden"></ol>
+            </section>
+
+            <section id="name-that-tune-game-panel" class="five-second-panel hidden" aria-live="polite">
+              <p id="name-that-tune-turn-status" class="five-second-turn-status"></p>
+              <p id="name-that-tune-instructions" class="five-second-feedback"></p>
+              <form id="name-that-tune-setup-form" class="heads-up-guess-form hidden">
+                <div id="name-that-tune-song-fields"></div>
+                <button type="submit" class="secondary-button full-width">Save song list</button>
+              </form>
+              <button id="name-that-tune-start-button" type="button" class="primary-button full-width hidden">Start game</button>
+              <strong id="name-that-tune-countdown" class="five-second-countdown"></strong>
+              <button id="name-that-tune-buzz-button" type="button" class="primary-button full-width hidden">I KNOW IT!</button>
+              <form id="name-that-tune-attempt-form" class="heads-up-guess-form hidden">
+                <label>
+                  <span>Song title</span>
+                  <input id="name-that-tune-title-input" type="text" maxlength="80" autocomplete="off" />
+                </label>
+                <label>
+                  <span>Artist</span>
+                  <input id="name-that-tune-artist-input" type="text" maxlength="80" autocomplete="off" />
+                </label>
+                <button type="submit" class="primary-button full-width">Submit attempt</button>
+              </form>
+              <div id="name-that-tune-judge-actions" class="finger-down-response-actions hidden">
+                <fieldset>
+                  <legend>Title</legend>
+                  <label><input type="radio" name="name-that-tune-title-correct" value="true" /> Correct</label>
+                  <label><input type="radio" name="name-that-tune-title-correct" value="false" /> Incorrect</label>
+                </fieldset>
+                <fieldset>
+                  <legend>Artist</legend>
+                  <label><input type="radio" name="name-that-tune-artist-correct" value="true" /> Correct</label>
+                  <label><input type="radio" name="name-that-tune-artist-correct" value="false" /> Incorrect</label>
+                </fieldset>
+                <button id="name-that-tune-judge-button" type="button" class="primary-button full-width">Submit judgment</button>
+              </div>
+              <button id="name-that-tune-reveal-button" type="button" class="secondary-button full-width hidden">Reveal answer</button>
+              <button id="name-that-tune-next-button" type="button" class="primary-button full-width hidden">NEXT SONG</button>
+              <p id="name-that-tune-feedback" class="five-second-feedback" role="status"></p>
+              <ol id="name-that-tune-scores" class="five-second-scores hidden"></ol>
+            </section>
+
+            <section id="do-not-spill-game-panel" class="five-second-panel hidden" aria-live="polite">
+              <p id="do-not-spill-spill-count" class="five-second-turn-status"></p>
+              <p id="do-not-spill-status" class="five-second-feedback"></p>
+              <div id="do-not-spill-warning" class="do-not-spill-warning">
+                Keep your phones away from the water.
+              </div>
+              <div id="do-not-spill-wheel" class="do-not-spill-wheel hidden" aria-live="polite"></div>
+              <p id="do-not-spill-feedback" class="five-second-feedback" role="status"></p>
+              <button id="do-not-spill-start-button" type="button" class="primary-button full-width hidden">Start Game</button>
+              <button id="do-not-spill-spill-button" type="button" class="primary-button full-width hidden">I SPILLED!</button>
+              <button id="do-not-spill-spin-button" type="button" class="primary-button full-width hidden">SPIN</button>
+              <div id="do-not-spill-decision-actions" class="finger-down-response-actions hidden">
+                <button id="do-not-spill-accept-button" type="button" class="primary-button">ACCEPT</button>
+                <button id="do-not-spill-pass-button" type="button" class="secondary-button">PASS</button>
+              </div>
+              <button id="do-not-spill-end-button" type="button" class="secondary-button full-width hidden">End Game</button>
+              <ol id="do-not-spill-recap" class="five-second-scores hidden"></ol>
+            </section>
+
+            <div id="game-result-actions" class="game-result-actions hidden">
+              <button id="replay-game-button" type="button" class="secondary-button full-width">Play This Game Again</button>
+              <button id="next-game-button" type="button" class="primary-button full-width">Choose Next Game</button>
+            </div>
+
+            <div id="game-actions" class="game-actions">
+              <button id="vote-button" class="primary-button full-width">Submit a vote</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="round-history-overlay" class="history-overlay hidden" aria-labelledby="round-history-title" aria-modal="true" role="dialog">
+          <div class="history-card">
+            <div class="history-header">
+              <h2 id="round-history-title">Completed rounds</h2>
+              <button id="close-round-history-button" type="button" class="ghost-button">Close</button>
+            </div>
+            <ol id="round-history-list" class="round-history-list"></ol>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>
