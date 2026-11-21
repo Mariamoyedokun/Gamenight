@@ -149,6 +149,7 @@
 
             <div id="host-controls" class="host-controls hidden">
               <button id="start-game-button" class="primary-button full-width">Start Game Night</button>
+              <button id="lobby-end-game-night-btn" type="button" class="secondary-button full-width danger-button" data-action="confirm-end-game-night">End Game Night</button>
             </div>
           </div>
         </section>
@@ -169,6 +170,10 @@
             </div>
 
             <div id="game-grid" class="game-grid" aria-live="polite"></div>
+
+            <div id="selection-host-controls" class="host-controls hidden">
+              <button id="selection-end-game-night-btn" type="button" class="secondary-button full-width danger-button" data-action="confirm-end-game-night">End Game Night</button>
+            </div>
           </div>
         </section>
 
@@ -503,6 +508,7 @@
             <div id="game-result-actions" class="game-result-actions hidden">
               <button id="replay-game-button" type="button" class="secondary-button full-width">Play This Game Again</button>
               <button id="next-game-button" type="button" class="primary-button full-width">Choose Next Game</button>
+              <button id="results-end-game-night-btn" type="button" class="secondary-button full-width danger-button" data-action="confirm-end-game-night">End Game Night</button>
             </div>
 
             <div id="game-actions" class="game-actions">
@@ -518,6 +524,19 @@
               <button id="close-round-history-button" type="button" class="ghost-button">Close</button>
             </div>
             <ol id="round-history-list" class="round-history-list"></ol>
+          </div>
+        </section>
+
+        <section id="end-game-night-overlay" class="history-overlay hidden" aria-labelledby="end-game-night-title" aria-modal="true" role="dialog">
+          <div class="modal-card">
+            <div class="modal-header">
+              <h2 id="end-game-night-title">End game night?</h2>
+            </div>
+            <p class="modal-body">Everyone will be removed from this room and the game night will end.</p>
+            <div class="modal-actions">
+              <button id="cancel-end-game-night-btn" type="button" class="secondary-button">Cancel</button>
+              <button id="confirm-end-game-night-btn" type="button" class="primary-button danger-button">End Game Night</button>
+            </div>
           </div>
         </section>
       </main>

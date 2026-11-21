@@ -372,6 +372,25 @@ class RoomStore {
     return this.serializeRoom(room);
   }
 
+  endGameNight({ roomCode, sessionToken }) {
+    const room = this.getRoomByCode(roomCode);
+    if (!room) {
+      throw new Error('Room not found.');
+    }
+
+    const hostPlayer = room.players.find((player) => player.sessionToken === sessionToken);
+    if (!hostPlayer || !hostPlayer.isHost) {
+      throw new Error('Only the host can end the game night.');
+    }
+
+    for (const player of room.players) {
+      this.sessions.delete(player.sessionToken);
+    }
+
+    this.rooms.delete(room.code);
+    return room;
+  }
+
   clearSelectedGame({ roomCode, sessionToken }) {
     const room = this.getRoomByCode(roomCode);
     if (!room) {

@@ -249,6 +249,10 @@ const replayGameButton = document.getElementById('replay-game-button');
 const backToSelectionButton = document.getElementById('back-to-selection-button');
 const roundHistoryOverlayEl = document.getElementById('round-history-overlay');
 const roundHistoryListEl = document.getElementById('round-history-list');
+const selectionHostControlsEl = document.getElementById('selection-host-controls');
+const endGameNightOverlayEl = document.getElementById('end-game-night-overlay');
+const cancelEndGameNightBtn = document.getElementById('cancel-end-game-night-btn');
+const confirmEndGameNightBtn = document.getElementById('confirm-end-game-night-btn');
 
 function setConnectionStatus(message) {
   if (!connectionStatusEl) {
@@ -470,6 +474,10 @@ function renderGameSelection() {
   const connectedPlayers = state.room.players.filter((player) => player.connected).length;
   selectionRoomCodeEl.textContent = `Code: ${state.room.code}`;
   selectionPlayerCountEl.textContent = `Players: ${connectedPlayers}`;
+
+  if (selectionHostControlsEl) {
+    selectionHostControlsEl.classList.toggle('hidden', !isHost);
+  }
 
   if (!isHost) {
     selectionRoomTitleEl.textContent = `${state.room.name} — waiting for host`;
@@ -900,7 +908,7 @@ function renderFiveSecondRule(selectedGame) {
     fiveSecondTurnStatusEl.textContent = isMyTurn
       ? '⭐ YOUR TURN! Get ready to name 3 things in 5 seconds.'
       : `Waiting for ${activeName} to start their turn…`;
-    fiveSecondCountdownEl.textContent = '5s';
+    fiveSecondCountdownEl.textContent = '5';
     fiveSecondFeedbackEl.textContent = isMyTurn
       ? 'Tap "Start 5 Seconds" as soon as you are ready to speak!'
       : `${activeName} will answer aloud. Get ready to judge.`;
@@ -915,7 +923,7 @@ function renderFiveSecondRule(selectedGame) {
     fiveSecondFeedbackEl.textContent = '5-second countdown in progress…';
     updateFiveSecondCountdown();
   } else if (selectedGame.status === 'judging') {
-    fiveSecondCountdownEl.textContent = 'Time!';
+    fiveSecondCountdownEl.textContent = 'Time Up!';
     const judgeLabel = selectedGame.judgeDisplayName ? `Judge: ${selectedGame.judgeDisplayName}` : 'Waiting for judge…';
     fiveSecondTurnStatusEl.textContent = isMyTurn
       ? `Time up! ${judgeLabel} is deciding your result…`
@@ -962,14 +970,16 @@ function renderFiveSecondRule(selectedGame) {
 function updateFiveSecondCountdown() {
   if (!state.room || !state.room.selectedGame || state.room.selectedGame.id !== 'five-second-rule') return;
   const game = state.room.selectedGame;
-  if (game.status !== 'playing' || !game.deadlineAt) {
-    if (game.status !== 'ready' && game.status !== 'judging') {
-      fiveSecondCountdownEl.textContent = '';
+  // Run during both 'answering' and legacy 'playing' statuses
+  if ((game.status === 'answering' || game.status === 'playing') && game.deadlineAt) {
+    const secondsLeft = Math.max(0, Math.ceil((game.deadlineAt - Date.now()) / 1000));
+    fiveSecondCountdownEl.textContent = `${secondsLeft}`;
+    if (secondsLeft > 0) {
+      requestAnimationFrame(updateFiveSecondCountdown);
     }
     return;
   }
-  const secondsLeft = Math.max(0, Math.ceil((game.deadlineAt - Date.now()) / 1000));
-  fiveSecondCountdownEl.textContent = `${secondsLeft}s`;
+  // For any other non-static state, leave the element as-is (set by the render branch)
 }
 
 function renderHeadsUp(selectedGame) {
@@ -2106,7 +2116,11 @@ function renderRoom() {
   roomCodeEl.textContent = state.room.code;
   playerCountEl.textContent = `${state.room.players.length}/12`;
   renderPlayerList();
-  hostControlsEl.classList.toggle('hidden', !state.room.players.some((player) => player.sessionToken === state.token && player.isHost));
+  const isHost = state.room.players.some((player) => player.sessionToken === state.token && player.isHost);
+  hostControlsEl.classList.toggle('hidden', !isHost);
+  if (selectionHostControlsEl) {
+    selectionHostControlsEl.classList.toggle('hidden', !isHost);
+  }
 
   if (!state.room.started) {
     showScreen('lobby');
@@ -2138,7 +2152,9 @@ function connectSocket() {
     if (!event.room) {
       state.room = null;
       clearRoomNotice();
-      setConnectionStatus('');
+      if (!connectionStatusEl || !connectionStatusEl.textContent.includes('Game night ended')) {
+        setConnectionStatus('');
+      }
       showScreen('landing');
       return;
     }
@@ -2155,8 +2171,24 @@ function connectSocket() {
     renderRoom();
   });
 
+  state.socket.on('room:game-night-ended', ({ message }) => {
+    state.room = null;
+    state.token = null;
+    setTabSessionToken(null);
+    clearRoomNotice();
+    if (endGameNightOverlayEl) {
+      endGameNightOverlayEl.classList.add('hidden');
+    }
+    if (roundHistoryOverlayEl) {
+      roundHistoryOverlayEl.classList.add('hidden');
+    }
+    showScreen('landing');
+    setConnectionStatus(message || 'Game night ended by the host.');
+  });
+
   state.socket.on('error-message', ({ message }) => {
     setAuthMessage(message, true);
+    if (confirmEndGameNightBtn) confirmEndGameNightBtn.disabled = false;
     if (state.room && state.room.selectedGame && state.room.selectedGame.id === 'five-second-rule') {
       if (fiveSecondFeedbackEl) fiveSecondFeedbackEl.textContent = message;
       if (fiveSecondStartBtn) fiveSecondStartBtn.disabled = false;
@@ -2425,6 +2457,48 @@ function bindEvents() {
     if (!state.socket || !state.token) return;
     state.socket.emit('room:start', { sessionToken: state.token });
   });
+
+  const openEndGameNightModal = () => {
+    const isHost = Boolean(state.room && state.room.players.some((player) => player.sessionToken === state.token && player.isHost));
+    if (!isHost) return;
+    if (confirmEndGameNightBtn) {
+      confirmEndGameNightBtn.disabled = false;
+    }
+    if (endGameNightOverlayEl) {
+      endGameNightOverlayEl.classList.remove('hidden');
+    }
+  };
+
+  const closeEndGameNightModal = () => {
+    if (endGameNightOverlayEl) {
+      endGameNightOverlayEl.classList.add('hidden');
+    }
+  };
+
+  document.querySelectorAll('[data-action="confirm-end-game-night"]').forEach((button) => {
+    button.addEventListener('click', openEndGameNightModal);
+  });
+
+  if (cancelEndGameNightBtn) {
+    cancelEndGameNightBtn.addEventListener('click', closeEndGameNightModal);
+  }
+
+  if (endGameNightOverlayEl) {
+    endGameNightOverlayEl.addEventListener('click', (event) => {
+      if (event.target === endGameNightOverlayEl) {
+        closeEndGameNightModal();
+      }
+    });
+  }
+
+  if (confirmEndGameNightBtn) {
+    confirmEndGameNightBtn.addEventListener('click', () => {
+      const isHost = Boolean(state.room && state.room.players.some((player) => player.sessionToken === state.token && player.isHost));
+      if (!isHost || !state.socket || !state.token) return;
+      confirmEndGameNightBtn.disabled = true;
+      state.socket.emit('room:end-game-night', { sessionToken: state.token });
+    });
+  }
 
   document.querySelectorAll('[data-action="show-round-history"]').forEach((button) => {
     button.addEventListener('click', () => {

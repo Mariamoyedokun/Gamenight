@@ -488,6 +488,45 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('room:end-game-night', ({ sessionToken: token } = {}) => {
+    const sessionToken = token || (socket.data && socket.data.sessionToken);
+    if (!sessionToken) {
+      socket.emit('error-message', { message: 'Your player session could not be verified. Reconnect and try again.' });
+      return;
+    }
+
+    const room = roomStore.getRoomForSession(sessionToken);
+    if (!room) {
+      socket.emit('error-message', { message: 'Session not found. Please refresh and try again.' });
+      return;
+    }
+
+    try {
+      const roomCode = room.code;
+      roomStore.endGameNight({ roomCode, sessionToken });
+      clearRoomTimers(roomCode);
+
+      // Clean up socket mapping
+      for (const [sToken] of activeSocketsBySession) {
+        if (!roomStore.getRoomForSession(sToken)) {
+          activeSocketsBySession.delete(sToken);
+        }
+      }
+
+      // Notify all connected players in the room
+      io.to(roomCode).emit('room:game-night-ended', {
+        message: 'Game night ended by the host.'
+      });
+
+      // Emit room: null so any listeners clean up state
+      io.to(roomCode).emit('room-state', { room: null });
+
+      io.in(roomCode).socketsLeave(roomCode);
+    } catch (error) {
+      socket.emit('error-message', { message: error.message });
+    }
+  });
+
   socket.on('room:leave', ({ sessionToken: token }) => {
     const room = roomStore.getRoomForSession(token);
     if (!room) {
